@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Three.js Car Controller</title>
+    <title>Nick Lancaster - Three.js</title>
     <style>
       body {
         margin: 0;
@@ -15,91 +15,132 @@
     </style>
   </head>
   <body>
-    <!-- Load Three.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/geometries/TextGeometry.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/loaders/FontLoader.js"></script>
     <script>
-              // Ensure Three.js is loaded before this script runs
-              window.onload = function () {
-                  // Three.js Scene Setup
-                  const scene = new THREE.Scene();
-                  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-                  const renderer = new THREE.WebGLRenderer();
-                  renderer.setSize(window.innerWidth, window.innerHeight);
-                  document.body.appendChild(renderer.domElement);
+      window.onload = function () {
+        // Scene Setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
 
-                  // Dirt Textured Ground
-                  const loader = new THREE.TextureLoader();
-                //   const loader = new THREE.GLTFLoader();
-                  const groundTexture = loader.load('https://nicklan.com/images/ground.webp'); // Example dirt texture URL
-                  groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
-                  groundTexture.repeat.set(20, 20);
+        // Gradient Background
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = canvas.height = 512;
 
-                  const ground = new THREE.Mesh(
-                      new THREE.PlaneGeometry(100, 100),
-                      new THREE.MeshStandardMaterial({ map: groundTexture })
-                  );
-                  ground.rotation.x = -Math.PI / 2;
-                  scene.add(ground);
+        // Create gradient
+        const gradient = context.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, '#5D4037'); // Top - lighter brown
+        gradient.addColorStop(1, '#3E2723'); // Bottom - darker brown
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, canvas.width, canvas.height);
 
-                  // Lighting
-                  const light = new THREE.DirectionalLight(0xffffff, 1);
-                  light.position.set(10, 10, 10).normalize();
-                  scene.add(light);
+        const backgroundTexture = new THREE.CanvasTexture(canvas);
+        scene.background = backgroundTexture;
 
-                  // Car (represented as a simple box)
-                  const car = new THREE.Mesh(
-                      new THREE.BoxGeometry(1, 0.5, 2),
-                      new THREE.MeshStandardMaterial({ color: 0xff0000 })
-                  );
-                  car.position.y = 0.25;
-                  scene.add(car);
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
 
-                  // Camera Position
-                  camera.position.set(0, 5, 10);
-                  camera.lookAt(0, 0, 0);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(10, 10, 10).normalize();
+        scene.add(directionalLight);
 
-                  // Movement Variables
-                  let forward = 0, turn = 0;
+        // Tonka Truck Model
+        const loader = new THREE.TextureLoader();
+        const truckTexture = loader.load('truck.webp'); // Replace with truck image file
 
-                  // Keyboard Controls
-                  document.addEventListener('keydown', (event) => {
-                      switch (event.code) {
-                          case 'ArrowUp': forward = 0.1; break;
-                          case 'ArrowDown': forward = -0.1; break;
-                          case 'ArrowLeft': turn = 0.05; break;
-                          case 'ArrowRight': turn = -0.05; break;
-                      }
-                  });
+        const car = new THREE.Mesh(
+          new THREE.BoxGeometry(2, 1, 4),
+          new THREE.MeshStandardMaterial({ map: truckTexture })
+        );
+        car.position.y = 0.5;
+        scene.add(car);
 
-                  document.addEventListener('keyup', (event) => {
-                      switch (event.code) {
-                          case 'ArrowUp':
-                          case 'ArrowDown': forward = 0; break;
-                          case 'ArrowLeft':
-                          case 'ArrowRight': turn = 0; break;
-                      }
-                  });
+        // Ground Plane
+        const ground = new THREE.Mesh(
+          new THREE.PlaneGeometry(100, 100),
+          new THREE.MeshStandardMaterial({ color: 0x5d4037 })
+        );
+        ground.rotation.x = -Math.PI / 2;
+        scene.add(ground);
 
-                  // Animation Loop
-                  function animate() {
-                      requestAnimationFrame(animate);
+        // Camera Position
+        camera.position.set(0, 5, 10);
+        camera.lookAt(0, 0, 0);
 
-                      // Update Car Movement
-                      car.rotation.y += turn;
-                      car.position.x += Math.sin(car.rotation.y) * forward;
-                      car.position.z += Math.cos(car.rotation.y) * forward;
+        // Add "Nick Lancaster" Text
+        const fontLoader = new THREE.FontLoader();
+        fontLoader.load(
+          'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', // Load font
+          (font) => {
+            const textGeometry = new THREE.TextGeometry('Nick Lancaster', {
+              font: font,
+              size: 1,
+              height: 0.5,
+            });
 
-                      renderer.render(scene, camera);
-                  }
+            const textMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
+            const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+            textMesh.position.set(-7, 2, 0); // Position the text
+            scene.add(textMesh);
+          }
+        );
 
-                  function updateCamera() {
-                    camera.position.x = car.position.x + 5 * Math.sin(car.rotation.y);
-                    camera.position.z = car.position.z + 5 * Math.cos(car.rotation.y);
-                    camera.lookAt(car.position);
-                  }
+        // Movement Variables
+        let forward = 0,
+          turn = 0;
 
-                  animate();
-              };
+        // Keyboard Controls
+        document.addEventListener('keydown', (event) => {
+          switch (event.code) {
+            case 'ArrowUp':
+              forward = 0.1;
+              break;
+            case 'ArrowDown':
+              forward = -0.1;
+              break;
+            case 'ArrowLeft':
+              turn = 0.05;
+              break;
+            case 'ArrowRight':
+              turn = -0.05;
+              break;
+          }
+        });
+
+        document.addEventListener('keyup', (event) => {
+          switch (event.code) {
+            case 'ArrowUp':
+            case 'ArrowDown':
+              forward = 0;
+              break;
+            case 'ArrowLeft':
+            case 'ArrowRight':
+              turn = 0;
+              break;
+          }
+        });
+
+        // Animation Loop
+        function animate() {
+          requestAnimationFrame(animate);
+
+          // Update Car Movement
+          car.rotation.y += turn;
+          car.position.x += Math.sin(car.rotation.y) * forward;
+          car.position.z += Math.cos(car.rotation.y) * forward;
+
+          // Render
+          renderer.render(scene, camera);
+        }
+
+        animate();
+      };
     </script>
   </body>
 </html>
