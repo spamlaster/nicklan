@@ -16,8 +16,7 @@
   </head>
   <body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/geometries/TextGeometry.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/loaders/FontLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <script>
       window.onload = function () {
         // Scene Setup
@@ -32,7 +31,6 @@
         const context = canvas.getContext('2d');
         canvas.width = canvas.height = 512;
 
-        // Create gradient
         const gradient = context.createLinearGradient(0, 0, 0, canvas.height);
         gradient.addColorStop(0, '#5D4037'); // Top - lighter brown
         gradient.addColorStop(1, '#3E2723'); // Bottom - darker brown
@@ -50,46 +48,60 @@
         directionalLight.position.set(10, 10, 10).normalize();
         scene.add(directionalLight);
 
-        // Tonka Truck Model
-        const loader = new THREE.TextureLoader();
-        const truckTexture = loader.load('images/truck.webp'); // Replace with truck image file
-
-        const car = new THREE.Mesh(
-          new THREE.BoxGeometry(2, 1, 4),
-          new THREE.MeshStandardMaterial({ map: truckTexture })
-        );
-        car.position.y = 0.5;
-        scene.add(car);
-
         // Ground Plane
         const ground = new THREE.Mesh(
-          new THREE.PlaneGeometry(100, 100),
+          new THREE.PlaneGeometry(200, 200),
           new THREE.MeshStandardMaterial({ color: 0x5d4037 })
         );
         ground.rotation.x = -Math.PI / 2;
         scene.add(ground);
 
+        // GLTF Truck Model
+        const loader = new THREE.GLTFLoader();
+        let truck, wheels = [];
+        loader.load(
+          'path/to/truck_model.glb', // Replace with the URL to your GLTF/GLB truck model
+          (gltf) => {
+            truck = gltf.scene;
+            scene.add(truck);
+
+            // Find wheels (assuming the model has parts named "wheel1", "wheel2", etc.)
+            truck.traverse((child) => {
+              if (child.isMesh && child.name.toLowerCase().includes('wheel')) {
+                wheels.push(child);
+              }
+            });
+
+            truck.position.set(0, 0.5, 0);
+          },
+          undefined,
+          (error) => console.error('Error loading the truck model:', error)
+        );
+
+        // Add Trees
+        const treeMaterial = new THREE.MeshStandardMaterial({ color: 0x2e7d32 });
+        for (let i = 0; i < 20; i++) {
+          const trunk = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.2, 0.2, 1),
+            new THREE.MeshStandardMaterial({ color: 0x8b4513 })
+          );
+          const foliage = new THREE.Mesh(
+            new THREE.SphereGeometry(0.5),
+            treeMaterial
+          );
+
+          const treeGroup = new THREE.Group();
+          foliage.position.y = 0.75;
+          treeGroup.add(trunk);
+          treeGroup.add(foliage);
+
+          treeGroup.position.set(Math.random() * 100 - 50, 0, Math.random() * 100 - 50);
+          scene.add(treeGroup);
+        }
+
         // Camera Position
         camera.position.set(0, 5, 10);
         camera.lookAt(0, 0, 0);
-
-        // Add "Nick Lancaster" Text
-        const fontLoader = new THREE.FontLoader();
-        fontLoader.load(
-          'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', // Load font
-          (font) => {
-            const textGeometry = new THREE.TextGeometry('Nick Lancaster', {
-              font: font,
-              size: 1,
-              height: 0.5,
-            });
-
-            const textMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
-            const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-            textMesh.position.set(-7, 2, 0); // Position the text
-            scene.add(textMesh);
-          }
-        );
 
         // Movement Variables
         let forward = 0,
@@ -130,12 +142,18 @@
         function animate() {
           requestAnimationFrame(animate);
 
-          // Update Car Movement
-          car.rotation.y += turn;
-          car.position.x += Math.sin(car.rotation.y) * forward;
-          car.position.z += Math.cos(car.rotation.y) * forward;
+          // Update Truck Movement
+          if (truck) {
+            truck.rotation.y += turn;
+            truck.position.x += Math.sin(truck.rotation.y) * forward;
+            truck.position.z += Math.cos(truck.rotation.y) * forward;
 
-          // Render
+            // Rotate Wheels
+            wheels.forEach((wheel) => {
+              wheel.rotation.x -= forward * 2;
+            });
+          }
+
           renderer.render(scene, camera);
         }
 
