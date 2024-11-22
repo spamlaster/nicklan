@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Three.js Car Controller</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Load Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+              // Ensure Three.js is loaded before this script runs
+              window.onload = function () {
+                  // Three.js Scene Setup
+                  const scene = new THREE.Scene();
+                  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                  const renderer = new THREE.WebGLRenderer();
+                  renderer.setSize(window.innerWidth, window.innerHeight);
+                  document.body.appendChild(renderer.domElement);
+
+                  // Dirt Textured Ground
+                  const loader = new THREE.TextureLoader();
+                //   const loader = new THREE.GLTFLoader();
+                  const groundTexture = loader.load('https://nicklan.com/images/ground.webp'); // Example dirt texture URL
+                  groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
+                  groundTexture.repeat.set(20, 20);
+
+                  const ground = new THREE.Mesh(
+                      new THREE.PlaneGeometry(100, 100),
+                      new THREE.MeshStandardMaterial({ map: groundTexture })
+                  );
+                  ground.rotation.x = -Math.PI / 2;
+                  scene.add(ground);
+
+                  // Lighting
+                  const light = new THREE.DirectionalLight(0xffffff, 1);
+                  light.position.set(10, 10, 10).normalize();
+                  scene.add(light);
+
+                  // Car (represented as a simple box)
+                  const car = new THREE.Mesh(
+                      new THREE.BoxGeometry(1, 0.5, 2),
+                      new THREE.MeshStandardMaterial({ color: 0xff0000 })
+                  );
+                  car.position.y = 0.25;
+                  scene.add(car);
+
+                  // Camera Position
+                  camera.position.set(0, 5, 10);
+                  camera.lookAt(0, 0, 0);
+
+                  // Movement Variables
+                  let forward = 0, turn = 0;
+
+                  // Keyboard Controls
+                  document.addEventListener('keydown', (event) => {
+                      switch (event.code) {
+                          case 'ArrowUp': forward = 0.1; break;
+                          case 'ArrowDown': forward = -0.1; break;
+                          case 'ArrowLeft': turn = 0.05; break;
+                          case 'ArrowRight': turn = -0.05; break;
+                      }
+                  });
+
+                  document.addEventListener('keyup', (event) => {
+                      switch (event.code) {
+                          case 'ArrowUp':
+                          case 'ArrowDown': forward = 0; break;
+                          case 'ArrowLeft':
+                          case 'ArrowRight': turn = 0; break;
+                      }
+                  });
+
+                  // Animation Loop
+                  function animate() {
+                      requestAnimationFrame(animate);
+
+                      // Update Car Movement
+                      car.rotation.y += turn;
+                      car.position.x += Math.sin(car.rotation.y) * forward;
+                      car.position.z += Math.cos(car.rotation.y) * forward;
+
+                      renderer.render(scene, camera);
+                  }
+
+                  function updateCamera() {
+                    camera.position.x = car.position.x + 5 * Math.sin(car.rotation.y);
+                    camera.position.z = car.position.z + 5 * Math.cos(car.rotation.y);
+                    camera.lookAt(car.position);
+                  }
+
+                  animate();
+              };
+    </script>
+  </body>
+</html>
