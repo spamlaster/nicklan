@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nick Lancaster - Three.js</title>
+    <title>Three.js Car Controller</title>
     <style>
       body {
         margin: 0;
@@ -15,126 +15,77 @@
     </style>
   </head>
   <body>
+    <!-- Load Three.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <script>
+      // Ensure Three.js is loaded before this script runs
       window.onload = function () {
-        // Scene Setup
+        // Three.js Scene Setup
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Gradient Background
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        canvas.width = canvas.height = 512;
+        // Dirt Textured Ground
+        const loader = new THREE.TextureLoader();
+        const groundTexture = loader.load('https://i.imgur.com/3vAOZrm.jpg'); // Example dirt texture URL
+        groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
+        groundTexture.repeat.set(20, 20);
 
-        const gradient = context.createLinearGradient(0, 0, 0, canvas.height);
-        gradient.addColorStop(0, '#5D4037'); // Top - lighter brown
-        gradient.addColorStop(1, '#3E2723'); // Bottom - darker brown
-        context.fillStyle = gradient;
-        context.fillRect(0, 0, canvas.width, canvas.height);
-
-        const backgroundTexture = new THREE.CanvasTexture(canvas);
-        scene.background = backgroundTexture;
-
-        // Lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-        scene.add(ambientLight);
-
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(10, 10, 10).normalize();
-        scene.add(directionalLight);
-
-        // Ground Plane
         const ground = new THREE.Mesh(
-          new THREE.PlaneGeometry(200, 200),
-          new THREE.MeshStandardMaterial({ color: 0x5d4037 })
+          new THREE.PlaneGeometry(100, 100),
+          new THREE.MeshStandardMaterial({ map: groundTexture })
         );
         ground.rotation.x = -Math.PI / 2;
         scene.add(ground);
 
-        // GLTF Truck Model
-        const loader = new THREE.GLTFLoader();
-        let truck, wheels = [];
-        loader.load(
-          'path/to/truck_model.glb', // Replace with the URL to your GLTF/GLB truck model
+        // Lighting
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(10, 10, 10).normalize();
+        scene.add(light);
+
+        // Car (using GLTF model)
+        let car;
+        const gltfLoader = new THREE.GLTFLoader();
+        gltfLoader.load(
+          'path/to/car_model.gltf',
           (gltf) => {
-            truck = gltf.scene;
-            scene.add(truck);
-
-            // Find wheels (assuming the model has parts named "wheel1", "wheel2", etc.)
-            truck.traverse((child) => {
-              if (child.isMesh && child.name.toLowerCase().includes('wheel')) {
-                wheels.push(child);
-              }
-            });
-
-            truck.position.set(0, 0.5, 0);
+            car = gltf.scene;
+            car.scale.set(0.5, 0.5, 0.5);
+            car.position.y = 0.25;
+            scene.add(car);
           },
           undefined,
-          (error) => console.error('Error loading the truck model:', error)
+          (error) => {
+            console.error('Error loading GLTF model:', error);
+          }
         );
-
-        // Add Trees
-        const treeMaterial = new THREE.MeshStandardMaterial({ color: 0x2e7d32 });
-        for (let i = 0; i < 20; i++) {
-          const trunk = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.2, 0.2, 1),
-            new THREE.MeshStandardMaterial({ color: 0x8b4513 })
-          );
-          const foliage = new THREE.Mesh(
-            new THREE.SphereGeometry(0.5),
-            treeMaterial
-          );
-
-          const treeGroup = new THREE.Group();
-          foliage.position.y = 0.75;
-          treeGroup.add(trunk);
-          treeGroup.add(foliage);
-
-          treeGroup.position.set(Math.random() * 100 - 50, 0, Math.random() * 100 - 50);
-          scene.add(treeGroup);
-        }
 
         // Camera Position
         camera.position.set(0, 5, 10);
         camera.lookAt(0, 0, 0);
 
         // Movement Variables
-        let forward = 0,
-          turn = 0;
+        let forward = 0, turn = 0;
 
         // Keyboard Controls
         document.addEventListener('keydown', (event) => {
           switch (event.code) {
-            case 'ArrowUp':
-              forward = 0.1;
-              break;
-            case 'ArrowDown':
-              forward = -0.1;
-              break;
-            case 'ArrowLeft':
-              turn = 0.05;
-              break;
-            case 'ArrowRight':
-              turn = -0.05;
-              break;
+            case 'ArrowUp': forward = 0.1; break;
+            case 'ArrowDown': forward = -0.1; break;
+            case 'ArrowLeft': turn = 0.05; break;
+            case 'ArrowRight': turn = -0.05; break;
           }
         });
 
         document.addEventListener('keyup', (event) => {
           switch (event.code) {
             case 'ArrowUp':
-            case 'ArrowDown':
-              forward = 0;
-              break;
+            case 'ArrowDown': forward = 0; break;
             case 'ArrowLeft':
-            case 'ArrowRight':
-              turn = 0;
-              break;
+            case 'ArrowRight': turn = 0; break;
           }
         });
 
@@ -142,16 +93,17 @@
         function animate() {
           requestAnimationFrame(animate);
 
-          // Update Truck Movement
-          if (truck) {
-            truck.rotation.y += turn;
-            truck.position.x += Math.sin(truck.rotation.y) * forward;
-            truck.position.z += Math.cos(truck.rotation.y) * forward;
+          // Ensure car is loaded before applying movement logic
+          if (car) {
+            // Update Car Movement
+            car.rotation.y += turn;
+            car.position.x += Math.sin(car.rotation.y) * forward;
+            car.position.z += Math.cos(car.rotation.y) * forward;
 
-            // Rotate Wheels
-            wheels.forEach((wheel) => {
-              wheel.rotation.x -= forward * 2;
-            });
+            // Update Camera
+            camera.position.x = car.position.x + 5 * Math.sin(car.rotation.y);
+            camera.position.z = car.position.z + 5 * Math.cos(car.rotation.y);
+            camera.lookAt(car.position);
           }
 
           renderer.render(scene, camera);
