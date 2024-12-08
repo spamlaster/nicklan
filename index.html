@@ -1,164 +1,231 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nick Lancaster - Three.js</title>
-    <style>
-      body {
-        margin: 0;
-        overflow: hidden;
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NickLan</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FontLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/geometries/TextGeometry.js"></script>
+
+  <script>
+    window.onload = function () {
+      // Scene Setup
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      // Gradient Background
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      canvas.width = canvas.height = 512;
+
+      const gradient = context.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, '#a35527');
+      gradient.addColorStop(1, '#FFA726');
+      context.fillStyle = gradient;
+      context.fillRect(0, 0, canvas.width, canvas.height);
+
+      const backgroundTexture = new THREE.CanvasTexture(canvas);
+      scene.background = backgroundTexture;
+
+      // Lighting
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+      directionalLight.position.set(10, 10, 10).normalize();
+      scene.add(directionalLight);
+
+      // Motorcycle
+      const loader = new THREE.GLTFLoader();
+      let motorcycle;
+      loader.load(
+        'https://threejs.org/examples/models/gltf/DamagedHelmet/glTF/DamagedHelmet.gltf', // Replace with a motorcycle model URL if available
+        (gltf) => {
+          motorcycle = gltf.scene;
+          motorcycle.scale.set(0.5, 0.5, 0.5);
+          motorcycle.position.set(0, 1.5, -5);
+          motorcycle.visible = false; // Initially hidden
+          scene.add(motorcycle);
+        }
+      );
+
+      // Ramp with Log Texture
+      function createRamp(x, z) {
+        const logTexture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/wood.jpg');
+        const rampMaterial = new THREE.MeshStandardMaterial({ map: logTexture });
+
+        const rampGeometry = new THREE.BoxGeometry(3, 0.5, 10);
+        const ramp = new THREE.Mesh(rampGeometry, rampMaterial);
+        ramp.rotation.x = -Math.PI / 6;
+        ramp.position.set(x, 0, z);
+        ramp.visible = false; // Initially hidden
+        scene.add(ramp);
+
+        return ramp;
       }
-      canvas {
-        display: block;
+
+      const ramp = createRamp(0, 10);
+
+      // Create Trees
+      function createTree(x, z) {
+        const treeTrunk = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.5, 0.5, 5),
+          new THREE.MeshStandardMaterial({ color: 0x8B4513 })
+        );
+        const treeFoliage = new THREE.Mesh(
+          new THREE.SphereGeometry(2),
+          new THREE.MeshStandardMaterial({ color: 0x2E7D32 })
+        );
+        treeFoliage.position.y = 3;
+        const tree = new THREE.Group();
+        tree.add(treeTrunk);
+        tree.add(treeFoliage);
+        tree.position.set(x, 2.5, z);
+        tree.visible = false; // Initially hidden
+        scene.add(tree);
+        return tree;
       }
-    </style>
-  </head>
-  <body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-    <script>
-      window.onload = function () {
-        // Scene Setup
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
 
-        // Gradient Background
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        canvas.width = canvas.height = 512;
+      const trees = [];
+      trees.push(createTree(5, -40));
+      trees.push(createTree(-5, -55));
+      trees.push(createTree(10, -80));
 
-        const gradient = context.createLinearGradient(0, 0, 0, canvas.height);
-        gradient.addColorStop(0, '#5D4037'); // Top - lighter brown
-        gradient.addColorStop(1, '#3E2723'); // Bottom - darker brown
-        context.fillStyle = gradient;
-        context.fillRect(0, 0, canvas.width, canvas.height);
+      // NICKLAN Text
+      const fontLoader = new THREE.FontLoader();
+      let nicklanText;
+      let clickCount = 0;
 
-        const backgroundTexture = new THREE.CanvasTexture(canvas);
-        scene.background = backgroundTexture;
+      fontLoader.load('https://threejs.org/examples/fonts/helvetiker_bold.typeface.json', (font) => {
+        const textGeometry = new THREE.TextGeometry('NICKLAN', {
+          font: font,
+          size: 2,
+          height: 1,
+        });
+        const textMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
+        nicklanText = new THREE.Mesh(textGeometry, textMaterial);
+        nicklanText.position.set(-5, 2, -25);
+        scene.add(nicklanText);
+      });
 
-        // Lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-        scene.add(ambientLight);
+      // Click Event to Reveal Scene
+      window.addEventListener('click', () => {
+        clickCount++;
+        if (clickCount >= 5) {
+          if (motorcycle) motorcycle.visible = true;
+          ramp.visible = true;
+          trees.forEach(tree => tree.visible = true);
+        }
+      });
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(10, 10, 10).normalize();
-        scene.add(directionalLight);
+      // Movement Variables
+      let forward = 0,
+        turn = 0;
 
-        // Ground Plane
-        const ground = new THREE.Mesh(
-          new THREE.PlaneGeometry(200, 200),
-          new THREE.MeshStandardMaterial({ color: 0x5d4037 })
-        );
-        ground.rotation.x = -Math.PI / 2;
-        scene.add(ground);
+      // Keyboard Controls
+      document.addEventListener('keydown', (event) => {
+        switch (event.code) {
+          case 'ArrowUp':
+            forward = 0.1;
+            break;
+          case 'ArrowDown':
+            forward = -0.1;
+            break;
+          case 'ArrowLeft':
+            turn = 0.05;
+            break;
+          case 'ArrowRight':
+            turn = -0.05;
+            break;
+        }
+      });
 
-        // GLTF Truck Model
-        const loader = new THREE.GLTFLoader();
-        let truck, wheels = [];
-        loader.load(
-          'path/to/truck_model.glb', // Replace with the URL to your GLTF/GLB truck model
-          (gltf) => {
-            truck = gltf.scene;
-            scene.add(truck);
+      document.addEventListener('keyup', (event) => {
+        switch (event.code) {
+          case 'ArrowUp':
+          case 'ArrowDown':
+            forward = 0;
+            break;
+          case 'ArrowLeft':
+          case 'ArrowRight':
+            turn = 0;
+            break;
+        }
+      });
 
-            // Find wheels (assuming the model has parts named "wheel1", "wheel2", etc.)
-            truck.traverse((child) => {
-              if (child.isMesh && child.name.toLowerCase().includes('wheel')) {
-                wheels.push(child);
-              }
-            });
+      // Animation Loop
+      function animate() {
+        requestAnimationFrame(animate);
 
-            truck.position.set(0, 0.5, 0);
-          },
-          undefined,
-          (error) => console.error('Error loading the truck model:', error)
-        );
+        if (motorcycle) {
+          motorcycle.rotation.y += turn;
 
-        // Add Trees
-        const treeMaterial = new THREE.MeshStandardMaterial({ color: 0x2e7d32 });
-        for (let i = 0; i < 20; i++) {
-          const trunk = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.2, 0.2, 1),
-            new THREE.MeshStandardMaterial({ color: 0x8b4513 })
+          // Predict next position
+          const newX = motorcycle.position.x + Math.sin(motorcycle.rotation.y) * forward;
+          const newZ = motorcycle.position.z + Math.cos(motorcycle.rotation.y) * forward;
+
+          // Collision detection with trees and NickLan text
+          let collision = false;
+          trees.forEach(tree => {
+            if (Math.abs(newX - tree.position.x) < 2 && Math.abs(newZ - tree.position.z) < 2) {
+              collision = true;
+            }
+          });
+
+          if (nicklanText && Math.abs(newX - nicklanText.position.x) < 5 && Math.abs(newZ - nicklanText.position.z) < 2) {
+            collision = true;
+          }
+
+          if (!collision) {
+            motorcycle.position.x = newX;
+            motorcycle.position.z = newZ;
+          }
+
+          // Check if motorcycle is on the ramp
+          const onRamp = (motorcycle.position.x > ramp.position.x - 1.5 && motorcycle.position.x < ramp.position.x + 1.5) &&
+                         (motorcycle.position.z > ramp.position.z - 5 && motorcycle.position.z < ramp.position.z + 5);
+          if (onRamp) {
+            motorcycle.rotation.x = Math.PI / 8; // Tilt the motorcycle upwards
+            // Adjust position to follow the ramp's incline
+            motorcycle.position.y = ramp.position.y + (motorcycle.position.z - ramp.position.z) * Math.tan(Math.PI / 6);
+          } else {
+            motorcycle.rotation.x = 0; // Reset the tilt when not on the ramp
+          }
+
+          // Camera follows the motorcycle
+          camera.position.set(
+            motorcycle.position.x + 10 * Math.sin(motorcycle.rotation.y),
+            motorcycle.position.y + 5,
+            motorcycle.position.z + 10 * Math.cos(motorcycle.rotation.y)
           );
-          const foliage = new THREE.Mesh(
-            new THREE.SphereGeometry(0.5),
-            treeMaterial
-          );
-
-          const treeGroup = new THREE.Group();
-          foliage.position.y = 0.75;
-          treeGroup.add(trunk);
-          treeGroup.add(foliage);
-
-          treeGroup.position.set(Math.random() * 100 - 50, 0, Math.random() * 100 - 50);
-          scene.add(treeGroup);
+          camera.lookAt(motorcycle.position);
         }
 
-        // Camera Position
-        camera.position.set(0, 5, 10);
-        camera.lookAt(0, 0, 0);
+        renderer.render(scene, camera);
+      }
 
-        // Movement Variables
-        let forward = 0,
-          turn = 0;
+      animate();
+    };
+  </script>
+</body>
 
-        // Keyboard Controls
-        document.addEventListener('keydown', (event) => {
-          switch (event.code) {
-            case 'ArrowUp':
-              forward = 0.1;
-              break;
-            case 'ArrowDown':
-              forward = -0.1;
-              break;
-            case 'ArrowLeft':
-              turn = 0.05;
-              break;
-            case 'ArrowRight':
-              turn = -0.05;
-              break;
-          }
-        });
-
-        document.addEventListener('keyup', (event) => {
-          switch (event.code) {
-            case 'ArrowUp':
-            case 'ArrowDown':
-              forward = 0;
-              break;
-            case 'ArrowLeft':
-            case 'ArrowRight':
-              turn = 0;
-              break;
-          }
-        });
-
-        // Animation Loop
-        function animate() {
-          requestAnimationFrame(animate);
-
-          // Update Truck Movement
-          if (truck) {
-            truck.rotation.y += turn;
-            truck.position.x += Math.sin(truck.rotation.y) * forward;
-            truck.position.z += Math.cos(truck.rotation.y) * forward;
-
-            // Rotate Wheels
-            wheels.forEach((wheel) => {
-              wheel.rotation.x -= forward * 2;
-            });
-          }
-
-          renderer.render(scene, camera);
-        }
-
-        animate();
-      };
-    </script>
-  </body>
 </html>
