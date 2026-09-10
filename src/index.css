@@ -1,0 +1,439 @@
+:root {
+  color: #f5f2e9;
+  background: #09110f;
+  font-family: Inter, Arial, sans-serif;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: #09110f;
+}
+
+button,
+a {
+  font: inherit;
+}
+
+.site-header {
+  position: absolute;
+  z-index: 20;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: white;
+  text-decoration: none;
+}
+
+.brand-icon {
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+}
+
+.brand strong,
+.brand small {
+  display: block;
+}
+
+.brand small {
+  margin-top: 4px;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+nav {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 7px 8px 7px 22px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(5, 14, 12, 0.78);
+  backdrop-filter: blur(12px);
+}
+
+nav a {
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+nav .contact-button {
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: #f1efe7;
+  color: #18201d;
+  font-weight: 700;
+}
+
+.world-map {
+  position: relative;
+  /* Fill the screen without stretching the panoramic artwork. */
+  min-height: 100svh;
+  min-height: 100dvh;
+  overflow: hidden;
+  background:
+    url("/images/nicklan-world-vehicles.webp")
+    center center / cover no-repeat;
+}
+
+/* Match the cover-scaled image so markers move with the artwork. */
+.desktop-markers {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100%, 150dvh);
+  height: max(66.666667vw, 100dvh);
+  transform: translate(-50%, -50%);
+}
+
+.world-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(3, 10, 10, 0.45),
+      rgba(3, 10, 10, 0.08) 45%,
+      rgba(3, 10, 10, 0.7)
+    );
+}
+
+.world-intro {
+  position: absolute;
+  z-index: 2;
+  top: 105px;
+  left: 25px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+.world-intro strong {
+  font-size: 12px;
+}
+
+.world-intro small {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.55);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.map-marker {
+  position: absolute;
+  z-index: 4;
+  transform: translate(-50%, calc(-100% + 7px));
+  padding: 0;
+  color: white;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.marker-card {
+  min-width: 180px;
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 13px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 3px;
+  background: rgba(7, 18, 16, 0.9);
+  transition: transform 180ms ease, border-color 180ms ease;
+}
+
+.map-marker:hover .marker-card {
+  transform: translateY(-4px);
+  border-color: var(--marker-color);
+}
+
+.marker-number {
+  color: var(--marker-color);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.marker-card strong,
+.marker-card small {
+  display: block;
+}
+
+.marker-card strong {
+  font-family: Georgia, serif;
+  font-size: 15px;
+}
+
+.marker-card small {
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 9px;
+}
+
+.marker-pin {
+  display: block;
+  width: 14px;
+  height: 14px;
+  margin: 15px auto 0;
+  border: 3px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  background: var(--marker-color);
+  box-shadow: 0 0 0 6px rgba(0, 0, 0, 0.45);
+}
+
+.destination-prompt {
+  position: absolute;
+  z-index: 2;
+  bottom: 24px;
+  left: 24px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.destination-prompt span {
+  margin-left: 60px;
+  font-size: 20px;
+}
+
+/* Destination details sit over the map; full pages have their own route. */
+.destination-panel {
+  position: fixed;
+  inset: 0 0 0 auto;
+  margin: 0;
+  width: min(480px, 42vw);
+  height: 100dvh;
+  max-width: 100%;
+  max-height: 100dvh;
+  padding: 130px 40px 36px;
+  border: 0;
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  background: #12211c;
+  color: #f5f2e9;
+  overflow-y: auto;
+}
+
+.destination-panel[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.destination-panel::backdrop {
+  background: rgba(3, 10, 10, 0.32);
+}
+
+.panel-close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font-size: 30px;
+  cursor: pointer;
+}
+
+.panel-number {
+  position: absolute;
+  top: 80px;
+  right: 36px;
+  font-size: 110px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.04);
+  pointer-events: none;
+}
+
+.destination-eyebrow {
+  position: relative;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.destination-panel h2,
+.destination-page h1 {
+  margin: 12px 0 24px;
+  font-family: Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(36px, 4vw, 60px);
+}
+
+.destination-summary {
+  font-size: 18px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.learn-more {
+  margin-top: auto;
+  padding-top: 48px;
+  color: #e0a62b;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.learn-more span { margin-left: 12px; }
+
+.destination-page {
+  max-width: 900px;
+  margin: auto;
+  padding: 150px 24px 60px;
+}
+
+.back-to-map {
+  display: inline-block;
+  margin-bottom: 48px;
+  color: #f5f2e9;
+}
+
+.destination-placeholder { color: rgba(255, 255, 255, 0.55); }
+
+button:focus-visible, a:focus-visible {
+  outline: 2px solid #e0a62b;
+  outline-offset: 4px;
+}
+
+@media (min-width: 1200px) and (max-width: 1300px) {
+  .world-intro {
+    left: 25%;
+  }
+}
+
+@media (max-width: 1199px), (max-aspect-ratio: 3/2) {
+  .site-header {
+    align-items: flex-start;
+  }
+
+  nav {
+    gap: 8px;
+    padding: 6px;
+  }
+
+  nav > a:not(.contact-button) {
+    display: none;
+  }
+
+  .brand small {
+    display: none;
+  }
+
+  .world-map {
+    aspect-ratio: auto;
+    min-height: 100svh;
+    min-height: 100dvh;
+    padding: 150px 20px 80px;
+    background-size: cover;
+    background-position: 55% center;
+  }
+
+  .world-overlay {
+    bottom: 0;
+    width: 100%;
+  }
+
+  .desktop-markers {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: auto;
+    height: auto;
+    transform: none;
+    z-index: 5;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .map-marker {
+    position: static;
+    transform: none;
+  }
+
+  .marker-card {
+    width: 100%;
+  }
+
+  .marker-pin {
+    display: none;
+  }
+
+  .world-intro {
+    top: 100px;
+  }
+}
+
+@media (max-width: 600px) {
+  .world-map {
+    min-height: max(640px, 100svh);
+    min-height: max(640px, 100dvh);
+    padding-top: 150px;
+    background-size: cover;
+    background-position: 55% center;
+  }
+
+  .world-overlay {
+    bottom: 0;
+    aspect-ratio: auto;
+  }
+
+  .site-header {
+    padding: 20px;
+  }
+
+  .brand {
+    gap: 8px;
+  }
+
+  nav .contact-button {
+    padding: 12px;
+  }
+
+  .desktop-markers {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .destination-panel {
+    inset: auto 0 0;
+    width: 100%;
+    height: 85dvh;
+    padding: 90px 24px 28px;
+    border-left: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px 16px 0 0;
+  }
+}
