@@ -1,6 +1,7 @@
 import { useState } from "react";
 import DestinationPanel from "./DestinationPanel";
 import type { Destination } from "../data/destinations";
+import EnterWorldButton from "./EnterWorldButton";
 import MapMarker from "./MapMarker";
 import { destinations } from "../data/destinations";
 
@@ -30,6 +31,7 @@ export default function WorldMap() {
       <div className="destination-prompt">
         Choose a destination <span>→</span>
       </div>
+      <EnterWorldButton />
       <DestinationPanel destination={selected} onClose={() => setSelected(null)} />
     </section>
   );

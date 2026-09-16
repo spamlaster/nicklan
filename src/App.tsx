@@ -1,11 +1,16 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import Header from "./components/Header";
 import WorldMap from "./components/WorldMap";
 import { destinations } from "./data/destinations";
+import ExploreErrorBoundary from "./explore/ExploreErrorBoundary";
+import ExploreLoading from "./explore/ExploreLoading";
+
+const ExploreWorld = lazy(() => import("./explore/ExploreWorld"));
 
 export default function App() {
   const [route, setRoute] = useState(window.location.hash);
   const destination = destinations.find((item) => route === `#/destinations/${item.id}`);
+  const isExploring = route === "#/explore";
 
   useEffect(() => {
     const navigate = () => {
@@ -17,9 +22,23 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (isExploring) {
+      document.title = "Explore | Nick's World";
+      return;
+    }
     document.title = destination ? `${destination.name} | Nick Lancaster` : "Nick Lancaster | Nick's World";
     if (destination) document.getElementById("page-title")?.focus();
-  }, [destination]);
+  }, [destination, isExploring]);
+
+  if (isExploring) {
+    return (
+      <ExploreErrorBoundary>
+        <Suspense fallback={<ExploreLoading />}>
+          <ExploreWorld />
+        </Suspense>
+      </ExploreErrorBoundary>
+    );
+  }
 
   return (
     <>
