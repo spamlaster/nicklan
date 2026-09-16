@@ -9,6 +9,8 @@ export type Destination = {
     left: string;
     top: string;
   };
+  /** Position in the 3D "/explore" world, as [x, z] world units. */
+  worldPosition: [number, number];
 };
 
 export const destinations: Destination[] = [
@@ -20,6 +22,7 @@ export const destinations: Destination[] = [
     description: "Machines & problem solving",
     color: "#e0a62b",
     position: { left: "24%", top: "55%" },
+    worldPosition: [-78, 60],
   },
   {
     id: "workshop",
@@ -29,6 +32,7 @@ export const destinations: Destination[] = [
     description: "Software & invention",
     color: "#45c8c3",
     position: { left: "36%", top: "48%" },
+    worldPosition: [-25, -43],
   },
   {
     id: "growcube",
@@ -38,6 +42,7 @@ export const destinations: Destination[] = [
     description: "Automation in the real world",
     color: "#72c95a",
     position: { left: "50%", top: "55%" },
+    worldPosition: [34, 68],
   },
   {
     id: "airstrip",
@@ -47,6 +52,7 @@ export const destinations: Destination[] = [
     description: "Backcountry aviation",
     color: "#5eb9d6",
     position: { left: "73%", top: "42%" },
+    worldPosition: [85, -34],
   },
   {
     id: "trailhead",
@@ -56,6 +62,7 @@ export const destinations: Destination[] = [
     description: "Outside is better",
     color: "#ef6c50",
     position: { left: "87%", top: "65%" },
+    worldPosition: [133, 77],
   },
   {
     id: "home",
@@ -65,5 +72,6 @@ export const destinations: Destination[] = [
     description: "The reason behind it all",
     color: "#e5c557",
     position: { left: "8%", top: "46%" },
+    worldPosition: [-122, -51],
   },
 ];
