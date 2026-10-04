@@ -32,3 +32,9 @@ public/images/*.prompt.txt
 *.njsproj
 *.sln
 *.sw?
+
+# Private portal database
+server/data/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal

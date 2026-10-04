@@ -437,3 +437,7 @@ button:focus-visible, a:focus-visible {
     border-radius: 16px 16px 0 0;
   }
 }
+
+@media (max-width: 1199px), (max-aspect-ratio: 3/2) {
+  nav > a.clients-link { display: inline; padding: 8px; }
+}

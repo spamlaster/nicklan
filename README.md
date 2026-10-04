@@ -22,3 +22,10 @@ Do not commit dependencies, build output, environment files, or secrets.
 
 The original Three.js website and its history are preserved on
 `archive/threejs-site` at commit `3dcbb1baa1db3c0b726d9a92e13f0b864b0dacce`.
+
+## Client portal
+
+The authenticated client project dashboard is at `#/clients`. It adds a separate
+VPS API with SQLite while preserving the public website and GitHub Pages hosting.
+See [setup, architecture, API hosting and preview deployment](docs/client-portal.md).
+The API must be configured and running before the portal can be used.

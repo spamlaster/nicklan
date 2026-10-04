@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import ClientPortal from "./clients/ClientPortal";
 import Header from "./components/Header";
 import WorldMap from "./components/WorldMap";
 import { destinations } from "./data/destinations";
@@ -17,15 +18,15 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    document.title = destination ? `${destination.name} | Nick Lancaster` : "Nick Lancaster | Nick's World";
+    document.title = route === "#/clients" || route.startsWith("#/clients/") ? "Client Projects | Nick Lancaster" : destination ? `${destination.name} | Nick Lancaster` : "Nick Lancaster | Nick's World";
     if (destination) document.getElementById("page-title")?.focus();
-  }, [destination]);
+  }, [destination, route]);
 
   return (
     <>
       <Header />
       <main>
-        {destination ? (
+        {route === "#/clients" || route.startsWith("#/clients/") ? <ClientPortal key={route} route={route} /> : destination ? (
           <article className="destination-page">
             <a className="back-to-map" href="#/">← Back to the map</a>
             <p className="destination-eyebrow" style={{ color: destination.color }}>{destination.number} · {destination.description}</p>

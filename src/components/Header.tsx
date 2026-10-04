@@ -13,6 +13,7 @@ export default function Header() {
       <nav>
         <a href="#/">Start here</a>
         <a href="#/destinations/workshop">My work</a>
+        <a className="clients-link" href="#/clients">Clients</a>
         <a className="contact-button" href="mailto:YOUR_EMAIL_ADDRESS">
           Say hello <span>→</span>
         </a>

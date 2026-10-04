@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "server": "node --env-file-if-exists=.env server/index.mjs",
+    "password:hash": "node server/password.mjs",
+    "test": "node --test server/*.test.mjs"
   },
   "dependencies": {
     "react": "^19.2.8",
