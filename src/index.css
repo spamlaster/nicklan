@@ -371,6 +371,93 @@ nav .contact-button {
 
 .learn-more span { margin-left: 12px; }
 
+.recent-builds {
+  flex-shrink: 0;
+  margin-top: 24px;
+}
+
+.recent-builds h3 {
+  margin: 0 0 18px;
+  font-family: Georgia, serif;
+  font-size: 26px;
+  font-weight: 400;
+}
+
+.build-list {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.build-card {
+  display: block;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+  background: rgba(7, 18, 16, 0.6);
+  color: inherit;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+a.build-card {
+  transition: border-color 180ms ease, background-color 180ms ease;
+}
+
+a.build-card:hover,
+a.build-card:focus-visible {
+  border-color: #45c8c3;
+  background: rgba(7, 18, 16, 0.9);
+}
+
+.build-card h4 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+  font-family: Georgia, serif;
+  font-size: 21px;
+  font-weight: 400;
+}
+
+.build-card h4 > span:not(.build-status) {
+  color: #45c8c3;
+}
+
+.build-label {
+  margin: 12px 0 8px;
+  color: #45c8c3;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.build-description {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.build-link-note {
+  display: block;
+  margin-top: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 11px;
+}
+
+.build-status {
+  padding: 4px 8px;
+  border: 1px solid rgba(224, 166, 43, 0.35);
+  border-radius: 999px;
+  color: #e0a62b;
+  font-family: Inter, Arial, sans-serif;
+  font-size: 11px;
+}
+
 .destination-page {
   max-width: 900px;
   margin: auto;
